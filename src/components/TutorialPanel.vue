@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useTutorialStore } from '@/stores/tutorial'
+import PracticePanel from '@/components/PracticePanel.vue'
 
 const store = useTutorialStore()
 
@@ -9,6 +10,23 @@ const currentStep = computed(() => store.currentStep)
 const currentStepIndex = computed(() => store.currentStepIndex)
 const totalSteps = computed(() => store.totalSteps)
 const showForces = computed(() => store.showForces)
+const currentProgress = computed(() => store.currentProgress)
+
+const progressStats = computed(() => {
+  if (!currentProgress.value) return null
+  const total = totalSteps.value
+  const completed = currentProgress.value.completedSteps.length
+  const practiceAttempts = currentProgress.value.totalPracticeAttempts || 0
+  const practicePassed = currentProgress.value.totalPracticePassed || 0
+  return {
+    total,
+    completed,
+    percent: total > 0 ? Math.round((completed / total) * 100) : 0,
+    practiceAttempts,
+    practicePassed,
+    practiceRate: practiceAttempts > 0 ? Math.round((practicePassed / practiceAttempts) * 100) : 0,
+  }
+})
 </script>
 
 <template>
@@ -25,6 +43,23 @@ const showForces = computed(() => store.showForces)
       </div>
       <div v-if="activeTutorial" class="text-xs text-gray-600 leading-relaxed">
         {{ activeTutorial.description }}
+      </div>
+
+      <div v-if="progressStats" class="mt-4 pt-3 border-t border-white/60">
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="bg-white/70 rounded-lg py-2 px-1">
+            <div class="text-lg font-bold text-blue-600">{{ progressStats.percent }}%</div>
+            <div class="text-[10px] text-gray-500">学习进度</div>
+          </div>
+          <div class="bg-white/70 rounded-lg py-2 px-1">
+            <div class="text-lg font-bold text-emerald-600">{{ progressStats.completed }}/{{ progressStats.total }}</div>
+            <div class="text-[10px] text-gray-500">完成步骤</div>
+          </div>
+          <div class="bg-white/70 rounded-lg py-2 px-1">
+            <div class="text-lg font-bold text-indigo-600">{{ progressStats.practiceRate }}%</div>
+            <div class="text-[10px] text-gray-500">练习正确率</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -118,6 +153,8 @@ const showForces = computed(() => store.showForces)
             </div>
           </div>
         </div>
+
+        <PracticePanel />
       </div>
     </div>
 

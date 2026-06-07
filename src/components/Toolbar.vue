@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import type { NodeType, DesignSchema, DesignScheme } from '@/types/knot'
 import { useKnotStore } from '@/stores/knot'
+import GenerateTutorialDialog from './GenerateTutorialDialog.vue'
 
 const router = useRouter()
 
@@ -10,6 +11,7 @@ const store = useKnotStore()
 const fileInput = ref<HTMLInputElement | null>(null)
 const schemeDialogOpen = ref(false)
 const comparisonDialogOpen = ref(false)
+const generateTutorialOpen = ref(false)
 const newSchemeName = ref('')
 const newSchemeDesc = ref('')
 const copiedTip = ref('')
@@ -263,6 +265,18 @@ function formatTime(ts: number) {
           <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
         </svg>
         受力仿真
+      </button>
+      <button
+        class="px-2.5 py-1 text-[11px] rounded-lg bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-400 hover:to-fuchsia-400 text-white font-medium transition-all duration-200 flex items-center gap-1 shadow-md shadow-violet-500/25"
+        title="将当前设计一键生成教学教程"
+        @click="generateTutorialOpen = true"
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2 2 7l10 5 10-5-10-5z" />
+          <path d="m2 17 10 5 10-5" />
+          <path d="m2 12 10 5 10-5" />
+        </svg>
+        生成教学
       </button>
       <button
         class="px-2.5 py-1 text-[11px] rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 text-white font-medium transition-all duration-200 flex items-center gap-1 shadow-md shadow-blue-500/25"
@@ -620,5 +634,7 @@ function formatTime(ts: number) {
         </div>
       </div>
     </Teleport>
+
+    <GenerateTutorialDialog v-model="generateTutorialOpen" />
   </div>
 </template>
