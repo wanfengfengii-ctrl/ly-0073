@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
 import type { NodeType, DesignSchema, DesignScheme } from '@/types/knot'
 import { useKnotStore } from '@/stores/knot'
+
+const router = useRouter()
 
 const store = useKnotStore()
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -260,6 +263,17 @@ function formatTime(ts: number) {
           <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
         </svg>
         受力仿真
+      </button>
+      <button
+        class="px-2.5 py-1 text-[11px] rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 text-white font-medium transition-all duration-200 flex items-center gap-1 shadow-md shadow-blue-500/25"
+        title="打开绳结教学演示模块"
+        @click="router.push('/tutorial')"
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+        </svg>
+        教学演示
       </button>
       <button
         class="px-2.5 py-1 text-[11px] rounded-lg border border-slate-600/70 bg-slate-700/40 hover:bg-slate-600/60 text-slate-200 hover:text-white font-medium transition-all duration-200 flex items-center gap-1"
