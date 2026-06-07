@@ -84,12 +84,50 @@ export const useKnotStore = defineStore('knot', () => {
     return dups
   })
 
+  const duplicateLabels = computed(() => {
+    const labels = new Map<string, { count: number; types: string[] }>()
+    nodes.value.forEach((n) => {
+      const label = n.data?.label || ''
+      const type = n.data?.nodeType || 'unknown'
+      const existing = labels.get(label)
+      if (existing) {
+        existing.count++
+        if (!existing.types.includes(type)) existing.types.push(type)
+      } else {
+        labels.set(label, { count: 1, types: [type] })
+      }
+    })
+    const dups: Array<{ label: string; types: string[] }> = []
+    labels.forEach((info, label) => {
+      if (info.count > 1 && label.trim() !== '') dups.push({ label, types: info.types })
+    })
+    return dups
+  })
+
+  function isLabelDuplicate(label: string, excludeNodeId?: string): boolean {
+    const trimmed = label.trim()
+    if (!trimmed) return false
+    for (const n of nodes.value) {
+      if (excludeNodeId && n.id === excludeNodeId) continue
+      if ((n.data?.label || '').trim() === trimmed) return true
+    }
+    return false
+  }
+
+  function typeLabel(type: string): string {
+    if (type === 'junction') return '连接点'
+    if (type === 'fixed') return '固定点'
+    if (type === 'load') return '受力点'
+    return '节点'
+  }
+
   const validationErrors = computed<ValidationError[]>(() => {
     const errors: ValidationError[] = []
-    duplicateJunctionLabels.value.forEach((label) => {
+    duplicateLabels.value.forEach(({ label, types }) => {
+      const typeNames = types.map((t) => typeLabel(t)).join('/')
       errors.push({
         type: 'node',
-        message: `连接点编号重复: ${label}`,
+        message: `编号重复: ${label} (${typeNames})`,
       })
     })
     edges.value.forEach((e) => {
@@ -178,11 +216,17 @@ export const useKnotStore = defineStore('knot', () => {
     }
   }
 
-  function updateNodeData(id: string, data: Partial<KnotNodeData>) {
+  function updateNodeData(id: string, data: Partial<KnotNodeData>): boolean {
     const node = nodes.value.find((n) => n.id === id)
-    if (node && node.data) {
-      node.data = { ...node.data, ...data }
+    if (!node || !node.data) return false
+    if (data.label !== undefined) {
+      const trimmed = data.label.trim()
+      if (!trimmed) return false
+      if (isLabelDuplicate(trimmed, id)) return false
+      data.label = trimmed
     }
+    node.data = { ...node.data, ...data }
+    return true
   }
 
   function removeNode(id: string) {
@@ -217,11 +261,20 @@ export const useKnotStore = defineStore('knot', () => {
     return edge
   }
 
-  function updateEdgeData(id: string, data: Partial<KnotEdgeData>) {
+  function updateEdgeData(id: string, data: Partial<KnotEdgeData>): boolean {
     const edge = edges.value.find((e) => e.id === id)
-    if (edge && edge.data) {
-      edge.data = { ...edge.data, ...data }
+    if (!edge || !edge.data) return false
+    if (data.length !== undefined) {
+      if (typeof data.length !== 'number' || isNaN(data.length) || data.length <= 0) return false
     }
+    if (data.maxLoad !== undefined) {
+      if (typeof data.maxLoad !== 'number' || isNaN(data.maxLoad) || data.maxLoad <= 0) return false
+    }
+    if (data.currentLoad !== undefined) {
+      if (typeof data.currentLoad !== 'number' || isNaN(data.currentLoad) || data.currentLoad < 0) return false
+    }
+    edge.data = { ...edge.data, ...data }
+    return true
   }
 
   function removeEdge(id: string) {
@@ -274,7 +327,7 @@ export const useKnotStore = defineStore('knot', () => {
     }
 
     const nodeIds = new Set<string>()
-    const junctionLabels = new Map<string, number>()
+    const allLabels = new Map<string, { count: number; types: string[] }>()
 
     schema.nodes.forEach((n, idx) => {
       if (!n.id) {
@@ -291,15 +344,23 @@ export const useKnotStore = defineStore('knot', () => {
       if (!n.position || typeof n.position.x !== 'number' || typeof n.position.y !== 'number') {
         errors.push({ type: 'node', targetId: n.id, message: `节点 ${n.id || idx}: 位置无效` })
       }
-      if (n.data?.nodeType === 'junction' && n.data?.label) {
-        const label = n.data.label
-        junctionLabels.set(label, (junctionLabels.get(label) || 0) + 1)
+      if (n.data?.label && n.data?.nodeType) {
+        const label = n.data.label.trim()
+        const nt = n.data.nodeType
+        const existing = allLabels.get(label)
+        if (existing) {
+          existing.count++
+          if (!existing.types.includes(nt)) existing.types.push(nt)
+        } else {
+          allLabels.set(label, { count: 1, types: [nt] })
+        }
       }
     })
 
-    junctionLabels.forEach((count, label) => {
-      if (count > 1) {
-        errors.push({ type: 'node', message: `连接点编号重复: ${label}` })
+    allLabels.forEach((info, label) => {
+      if (info.count > 1) {
+        const typeNames = info.types.map((t) => typeLabel(t)).join('/')
+        errors.push({ type: 'node', message: `编号重复: ${label} (${typeNames})` })
       }
     })
 
@@ -416,10 +477,12 @@ export const useKnotStore = defineStore('knot', () => {
     selectedEdge,
     overloadedEdges,
     danglingEdges,
+    duplicateLabels,
     duplicateJunctionLabels,
     validationErrors,
     materialUsage,
     importErrors,
+    isLabelDuplicate,
     addNode,
     updateNodePosition,
     updateNodeData,

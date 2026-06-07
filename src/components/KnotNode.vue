@@ -34,14 +34,30 @@ const typeLabel = computed(() => {
       return ''
   }
 })
+
+const icon = computed(() => {
+  switch (props.data.nodeType) {
+    case 'junction':
+      return '◉'
+    case 'fixed':
+      return '▣'
+    case 'load':
+      return '▲'
+    default:
+      return ''
+  }
+})
 </script>
 
 <template>
   <div :class="nodeClass" :title="typeLabel">
     <Handle type="target" :position="Position.Top" style="opacity: 0" />
-    <div class="flex flex-col items-center">
-      <span class="text-sm font-bold">{{ data.label }}</span>
-      <span class="text-[10px] opacity-70">{{ typeLabel }}</span>
+    <div class="flex flex-col items-center leading-tight">
+      <div class="flex items-center gap-1.5">
+        <span class="text-[10px] opacity-75">{{ icon }}</span>
+        <span class="text-sm font-bold tracking-wide">{{ data.label }}</span>
+      </div>
+      <span class="text-[9px] opacity-70 mt-0.5 font-medium">{{ typeLabel }}</span>
     </div>
     <Handle type="source" :position="Position.Bottom" style="opacity: 0" />
   </div>

@@ -25,65 +25,122 @@ body,
 }
 
 .vue-flow {
-  background: #fafafa;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.04), transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.03), transparent 50%),
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
 .knot-node {
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 14px;
+  font-weight: 700;
   font-size: 13px;
   cursor: grab;
   user-select: none;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  transition: box-shadow 0.15s, transform 0.15s;
-  min-width: 44px;
+  box-shadow:
+    0 4px 12px rgba(15, 23, 42, 0.1),
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition:
+    box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 56px;
   text-align: center;
   border: 2px solid transparent;
+  backdrop-filter: blur(4px);
+  letter-spacing: 0.3px;
+}
+
+.knot-node:active {
+  cursor: grabbing;
 }
 
 .knot-node:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 8px 24px rgba(15, 23, 42, 0.15),
+    0 2px 4px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transform: translateY(-1px);
 }
 
 .knot-node.selected {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25), 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: #6366f1;
+  box-shadow:
+    0 0 0 4px rgba(99, 102, 241, 0.18),
+    0 8px 24px rgba(99, 102, 241, 0.25),
+    0 2px 4px rgba(15, 23, 42, 0.08);
 }
 
 .knot-node.junction {
-  background: #ffffff;
-  color: #1f2937;
-  border-color: #d1d5db;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  color: #1e293b;
+  border-color: #e2e8f0;
+}
+
+.knot-node.junction.selected {
+  border-color: #6366f1;
+  background: linear-gradient(180deg, #ffffff 0%, #eef2ff 100%);
 }
 
 .knot-node.fixed {
-  background: #1e40af;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: #ffffff;
+  border-color: rgba(29, 78, 216, 0.6);
+}
+
+.knot-node.fixed.selected {
+  border-color: #a5b4fc;
+  box-shadow:
+    0 0 0 4px rgba(59, 130, 246, 0.25),
+    0 8px 24px rgba(29, 78, 216, 0.35),
+    0 2px 4px rgba(15, 23, 42, 0.1);
 }
 
 .knot-node.load {
-  background: #dc2626;
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
   color: #ffffff;
+  border-color: rgba(185, 28, 28, 0.6);
+}
+
+.knot-node.load.selected {
+  border-color: #fca5a5;
+  box-shadow:
+    0 0 0 4px rgba(239, 68, 68, 0.25),
+    0 8px 24px rgba(185, 28, 28, 0.35),
+    0 2px 4px rgba(15, 23, 42, 0.1);
 }
 
 .knot-edge-label {
-  background: white;
-  padding: 2px 6px;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 4px 10px;
+  border-radius: 8px;
   font-size: 11px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-weight: 500;
+  color: #475569;
+  box-shadow:
+    0 2px 8px rgba(15, 23, 42, 0.08),
+    0 1px 2px rgba(15, 23, 42, 0.05);
+  border: 1px solid #e2e8f0;
+  backdrop-filter: blur(6px);
 }
 
 .overloaded .vue-flow__edge-path {
-  stroke: #dc2626 !important;
-  stroke-width: 4 !important;
-  filter: drop-shadow(0 0 4px rgba(220, 38, 38, 0.6));
+  stroke: url(#overloadGradient) !important;
+  stroke-width: 5 !important;
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.55));
 }
 
 .dangling .vue-flow__edge-path {
-  stroke-dasharray: 6 4;
+  stroke-dasharray: 10 5;
   stroke: #f59e0b !important;
+  stroke-width: 2.5;
+  animation: danglingPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes danglingPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
 }
 
 ::-webkit-scrollbar {
@@ -94,9 +151,41 @@ body,
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 4px;
+  transition: background 0.15s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
 
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.vue-flow__minimap {
+  border-radius: 12px !important;
+  box-shadow:
+    0 4px 12px rgba(15, 23, 42, 0.1),
+    0 1px 2px rgba(15, 23, 42, 0.05) !important;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.vue-flow__controls {
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow:
+    0 4px 12px rgba(15, 23, 42, 0.1),
+    0 1px 2px rgba(15, 23, 42, 0.05) !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+.vue-flow__controls button {
+  border-bottom: 1px solid #e2e8f0 !important;
+  background: #ffffff !important;
+  transition: background 0.15s;
+}
+
+.vue-flow__controls button:hover {
+  background: #f1f5f9 !important;
+}
