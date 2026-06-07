@@ -548,6 +548,23 @@ export const useKnotStore = defineStore('knot', () => {
       }
     })
 
+    const edgeKeys = new Set<string>()
+    schema.edges.forEach((e, idx) => {
+      if (e.source && e.target) {
+        const key = [e.source, e.target].sort().join('|')
+        if (edgeKeys.has(key)) {
+          errors.push({
+            type: 'edge',
+            targetId: e.id,
+            message: `绳段 ${e.id || idx}: 节点 ${e.source} 与 ${e.target} 之间已存在连接`,
+            severity: 'error',
+            code: 'DUPLICATE_EDGE',
+          })
+        }
+        edgeKeys.add(key)
+      }
+    })
+
     schema.edges.forEach((e, idx) => {
       if (!e.id) {
         errors.push({ type: 'edge', message: `绳段[${idx}]: 缺少 id`, severity: 'error', code: 'NO_EDGE_ID' })
@@ -825,5 +842,6 @@ export const useKnotStore = defineStore('knot', () => {
     getEdgeRiskLevel,
     getEdgeLoadRatio,
     applySimulatedForces,
+    pushHistory,
   }
 })

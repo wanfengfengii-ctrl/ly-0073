@@ -96,6 +96,7 @@ const [edgePath, labelX, labelY] = getBezierPath({
   <EdgeLabelRenderer>
     <div
       class="knot-edge-label nodrag nopan cursor-pointer select-none"
+      @click.stop="store.selectEdge(props.id)"
       :style="{
         position: 'absolute',
         transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,

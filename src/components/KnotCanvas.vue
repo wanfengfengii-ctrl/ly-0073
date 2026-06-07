@@ -42,6 +42,10 @@ function handleConnect(conn: Connection) {
   store.addEdge(conn.source, conn.target)
 }
 
+function handleNodeDragStart() {
+  store.pushHistory()
+}
+
 function handleNodeDragStop(event: NodeDragEvent) {
   event.nodes.forEach((node) => {
     store.updateNodePosition(node.id, node.position)
@@ -78,6 +82,7 @@ onMounted(() => {
       :max-zoom="2"
       fit-view-on-init
       class="h-full w-full"
+      @node-drag-start="handleNodeDragStart"
       @node-drag-stop="handleNodeDragStop"
       @node-click="handleNodeClick"
       @edge-click="handleEdgeClick"
