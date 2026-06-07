@@ -30,8 +30,12 @@ function goToDesigner() {
   router.push('/')
 }
 
-function startTutorial(id: string) {
-  store.setActiveTutorial(id)
+function startTutorial(id: string, resume: boolean = true) {
+  store.setActiveTutorial(id, resume)
+}
+
+function getProgress(id: string) {
+  return store.getProgressForTutorial(id)
 }
 </script>
 
@@ -128,9 +132,37 @@ function startTutorial(id: string) {
                 <h4 class="text-base font-bold text-gray-900 mb-1.5 group-hover:text-blue-600 transition-colors">
                   {{ tut.name }}
                 </h4>
-                <p class="text-xs text-gray-500 leading-relaxed mb-4 line-clamp-2 min-h-[2rem]">
+                <p class="text-xs text-gray-500 leading-relaxed mb-3 line-clamp-2 min-h-[2rem]">
                   {{ tut.description }}
                 </p>
+
+                <div v-if="getProgress(tut.id) && (getProgress(tut.id)!.hasStarted || getProgress(tut.id)!.isCompleted)" class="mb-3">
+                  <div class="flex items-center justify-between mb-1">
+                    <span
+                      class="text-[11px] font-semibold inline-flex items-center gap-1"
+                      :class="getProgress(tut.id)!.isCompleted ? 'text-emerald-600' : 'text-blue-600'"
+                    >
+                      <svg v-if="getProgress(tut.id)!.isCompleted" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      <svg v-else class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                      </svg>
+                      {{ getProgress(tut.id)!.isCompleted ? '已完成' : `学习中 · 第 ${getProgress(tut.id)!.lastStepIndex + 1} / ${getProgress(tut.id)!.totalSteps} 步` }}
+                    </span>
+                    <span class="text-[11px] text-gray-500 font-mono">
+                      {{ Math.round(getProgress(tut.id)!.percent) }}%
+                    </span>
+                  </div>
+                  <div class="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      class="h-full rounded-full transition-all duration-500"
+                      :class="getProgress(tut.id)!.isCompleted ? 'bg-gradient-to-r from-emerald-400 to-teal-500' : 'bg-gradient-to-r from-blue-400 to-indigo-500'"
+                      :style="{ width: `${getProgress(tut.id)!.percent}%` }"
+                    ></div>
+                  </div>
+                </div>
 
                 <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                   <div class="flex items-center gap-3 text-[11px] text-gray-500">
@@ -154,7 +186,9 @@ function startTutorial(id: string) {
                     </span>
                   </div>
                   <span class="text-xs font-semibold text-blue-600 group-hover:text-blue-700 group-hover:translate-x-1 transition-all inline-flex items-center gap-0.5">
-                    开始学习
+                    <template v-if="getProgress(tut.id)?.isCompleted">重新学习</template>
+                    <template v-else-if="getProgress(tut.id)?.hasStarted">继续学习</template>
+                    <template v-else>开始学习</template>
                     <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                       <polyline points="9 18 15 12 9 6" />
                     </svg>

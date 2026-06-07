@@ -50,19 +50,52 @@ export const useTutorialStore = defineStore('tutorial', () => {
     return map
   })
 
-  function setActiveTutorial(id: string) {
+  function setActiveTutorial(id: string, resumeProgress: boolean = true) {
     const tutorial = tutorials.value.find((t) => t.id === id)
     if (!tutorial) return
     stopPlayback()
     activeTutorialId.value = id
-    currentStepIndex.value = 0
-    if (!progressMap.value.has(id)) {
+    const existingProgress = progressMap.value.get(id)
+    if (resumeProgress && existingProgress) {
+      const maxIndex = tutorial.steps.length - 1
+      currentStepIndex.value = Math.min(Math.max(0, existingProgress.lastStepIndex), maxIndex)
+    } else {
+      currentStepIndex.value = 0
+    }
+    if (!existingProgress) {
       progressMap.value.set(id, {
         tutorialId: id,
         completedSteps: [],
         lastStepIndex: 0,
         startedAt: Date.now(),
       })
+    }
+  }
+
+  function getProgressForTutorial(tutorialId: string) {
+    const tutorial = tutorials.value.find((t) => t.id === tutorialId)
+    if (!tutorial) return null
+    const progress = progressMap.value.get(tutorialId)
+    const total = tutorial.steps.length
+    if (!progress) {
+      return {
+        totalSteps: total,
+        completedSteps: 0,
+        lastStepIndex: 0,
+        percent: 0,
+        isCompleted: false,
+        hasStarted: false,
+      }
+    }
+    const completedCount = progress.completedSteps.length
+    return {
+      totalSteps: total,
+      completedSteps: completedCount,
+      lastStepIndex: progress.lastStepIndex,
+      percent: total > 0 ? (completedCount / total) * 100 : 0,
+      isCompleted: !!progress.completedAt,
+      hasStarted: completedCount > 0 || progress.lastStepIndex > 0,
+      completedAt: progress.completedAt,
     }
   }
 
@@ -149,6 +182,7 @@ export const useTutorialStore = defineStore('tutorial', () => {
   }
 
   function resetTutorial() {
+    stopPlayback()
     currentStepIndex.value = 0
     if (activeTutorialId.value) {
       progressMap.value.delete(activeTutorialId.value)
@@ -211,6 +245,7 @@ export const useTutorialStore = defineStore('tutorial', () => {
     currentProgress,
     tutorialsByCategory,
     setActiveTutorial,
+    getProgressForTutorial,
     goToStep,
     nextStep,
     prevStep,

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, watch, nextTick } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useTutorialStore } from '@/stores/tutorial'
 import { MATERIALS, RISK_COLORS } from '@/types/knot'
 import type { TutorialStepNode, TutorialStepEdge } from '@/types/tutorial'
@@ -183,6 +183,12 @@ onMounted(() => {
   nextTick(() => fitView())
   window.addEventListener('mousemove', handleMouseMove)
   window.addEventListener('mouseup', handleMouseUp)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('mousemove', handleMouseMove)
+  window.removeEventListener('mouseup', handleMouseUp)
+  isPanning.value = false
 })
 </script>
 
